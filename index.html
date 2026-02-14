@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Ambulance: AI Triage System</title>
+    <style>
+        :root {
+            --primary: #dc2626; /* Red for Ambulance */
+            --secondary: #1e293b; /* Slate */
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            padding: 2rem;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        header h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin: 0;
+        }
+        .icon-ambulance {
+            font-size: 2.5rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+        }
+        .card-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #64748b;
+        }
+        input[type="number"], input[type="datetime-local"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box; /* Fix padding issues */
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+        button {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #b91c1c;
+        }
+        
+        /* Result Styles */
+        #result-box {
+            display: none; /* Hidden by default */
+            margin-top: 2rem;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+        }
+        .status-normal { background: #dcfce7; color: #166534; }
+        .status-warning { background: #fef9c3; color: #854d0e; }
+        .status-critical { background: #fee2e2; color: #991b1b; animation: pulse 2s infinite; }
+        .status-suppressed { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .metric-card {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        .metric-label {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        .message-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #eff6ff;
+            color: #1e40af;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <span class="icon-ambulance"></span>
+        <h1>Smart Ambulance AI</h1>
+    </header>
+
+    <div class="grid">
+        <!-- Input Form -->
+        <div class="card">
+            <div class="card-header">Patient Vitals Entry</div>
+            <form id="vitalsForm">
+                <div class="form-group">
+                    <label>Heart Rate (BPM)</label>
+                    <input type="number" id="heart_rate" value="75" required>
+                </div>
+                <div class="form-group">
+                    <label>SpO2 (Oxygen %)</label>
+                    <input type="number" id="spo2" value="98" max="100" required>
+                </div>
+                <div class="grid" style="gap:1rem;">
+                    <div class="form-group">
+                        <label>Systolic BP (mmHg)</label>
+                        <input type="number" id="sbp" value="120" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Diastolic BP (mmHg)</label>
+                        <input type="number" id="dbp" value="80" required>
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label>Ambulance Vibration (0.0 - 1.0)</label>
+                    <input type="number" id="vibration" value="0.1" step="0.1" min="0" max="1.0" required>
+                    <small style="color:#64748b">0.0 = Smooth Road, 1.0 = Extreme Turbulence</small>
+                </div>
+                
+                <button type="submit">Analyze Vitals</button>
+            </form>
+            
+            <div style="margin-top: 1rem; text-align: center;">
+                <small><a href="#" onclick="fillScenario('normal')">Normal</a> | <a href="#" onclick="fillScenario('critical')">Critical</a> | <a href="#" onclick="fillScenario('suppressed')">High Vib</a></small>
+            </div>
+        </div>
+
+        <!-- Real-Time Analysis Output -->
+        <div class="card" id="output-card">
+            <div class="card-header">AI Triage Analysis</div>
+            
+            <div id="initial-state" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                Enter vitals to see AI prediction.
+            </div>
+
+            <div id="result-box">
+                <div style="text-align: center;">
+                    <div id="triage-badge" class="status-badge status-normal">NORMAL</div>
+                </div>
+                
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="risk-score">0</div>
+                        <div class="metric-label">Clinical Risk (0-100)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="confidence-score">100%</div>
+                        <div class="metric-label">Data Confidence</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="anomaly-flag">NO</div>
+                        <div class="metric-label">Deep Learning Anomaly</div>
+                    </div>
+                </div>
+
+                <div class="message-box" id="api-message">
+                    System Ready...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Scenarios for quick testing
+    const scenarios = {
+        'normal': { hr: 75, spo2: 98, sbp: 120, dbp: 80, vib: 0.1 },
+        'critical': { hr: 140, spo2: 85, sbp: 80, dbp: 50, vib: 0.0 },
+        'suppressed': { hr: 130, spo2: 88, sbp: 90, dbp: 60, vib: 0.8 }
+    };
+
+    function fillScenario(type) {
+        const data = scenarios[type];
+        document.getElementById('heart_rate').value = data.hr;
+        document.getElementById('spo2').value = data.spo2;
+        document.getElementById('sbp').value = data.sbp;
+        document.getElementById('dbp').value = data.dbp;
+        document.getElementById('vibration').value = data.vib;
+    }
+
+    document.getElementById('vitalsForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // 1. Collect Data
+        const payload = {
+            timestamp: new Date().toISOString(),
+            heart_rate: parseFloat(document.getElementById('heart_rate').value),
+            spo2: parseFloat(document.getElementById('spo2').value),
+            sbp: parseFloat(document.getElementById('sbp').value),
+            dbp: parseFloat(document.getElementById('dbp').value),
+            vibration: parseFloat(document.getElementById('vibration').value)
+        };
+
+        // 2. Call API
+        try {
+            const response = await fetch('http://127.0.0.1:8000/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            if (!response.ok) throw new Error("API Error");
+            
+            const result = await response.json();
+            
+            // 3. Update UI
+            document.getElementById('initial-state').style.display = 'none';
+            document.getElementById('result-box').style.display = 'block';
+            
+            // Update Metrics
+            document.getElementById('risk-score').textContent = result.risk_score;
+            document.getElementById('confidence-score').textContent = (result.confidence_score * 100).toFixed(0) + "%";
+            
+            const anomalyElem = document.getElementById('anomaly-flag');
+            anomalyElem.textContent = result.is_anomaly ? "YES" : "NO";
+            anomalyElem.style.color = result.is_anomaly ? "#dc2626" : "#166534";
+
+            document.getElementById('api-message').textContent = result.message;
+
+            // Update Badge Logic
+            const badge = document.getElementById('triage-badge');
+            badge.className = 'status-badge'; // Reset
+            
+            if (result.triage_status.includes("CRITICAL")) {
+                badge.classList.add('status-critical');
+                badge.textContent = "CRITICAL ALERT";
+            } else if (result.triage_status.includes("SUPPRESSED")) {
+                badge.classList.add('status-suppressed');
+                badge.textContent = "SUPPRESSED (VIBRATION)";
+            } else if (result.triage_status.includes("WARNING")) {
+                badge.classList.add('status-warning');
+                badge.textContent = "WARNING";
+            } else {
+                badge.classList.add('status-normal');
+                badge.textContent = "NORMAL";
+            }
+
+        } catch (error) {
+            alert("Error connecting to API. Is uvicorn running?");
+            console.error(error);
+        }
+    });
+</script>
+
+</body>
+</html>
