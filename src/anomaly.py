@@ -9,8 +9,9 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 # Define paths
-INPUT_FILE = r"C:\Users\HP\OneDrive\Desktop\MSC BDA\Aman Sir\smart_ambulance_synthetic_data.csv"
-OUTPUT_DIR = r"C:\Users\HP\OneDrive\Desktop\MSC BDA\Aman Sir"
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+INPUT_FILE = os.path.join(BASE_DIR, "data", "smart_ambulance_synthetic_data.csv")
 
 # Set random seed for reproducibility
 torch.manual_seed(42)
@@ -192,7 +193,7 @@ def run_deep_anomaly_detection(df):
     data_scaled = scaler.fit_transform(data)
     
     # Save Scaler for later use (Inference)
-    scaler_path = os.path.join(OUTPUT_DIR, 'scaler.pkl')
+    scaler_path = os.path.join(BASE_DIR, 'models', 'scaler.pkl')
     joblib.dump(scaler, scaler_path)
     print(f"Scaler saved to {scaler_path}")
     
@@ -224,7 +225,7 @@ def run_deep_anomaly_detection(df):
     model = train_model(model, train_loader, val_loader, epochs=20, device=device, patience=3)
     
     # Save Model state dict
-    model_path = os.path.join(OUTPUT_DIR, 'lstm_autoencoder.pth')
+    model_path = os.path.join(BASE_DIR, 'models', 'lstm_autoencoder.pth')
     torch.save(model.state_dict(), model_path)
     print(f"Model saved to {model_path}")
     
@@ -392,7 +393,7 @@ def plot_analysis(df):
     axes[3].grid(alpha=0.3)
     
     plt.tight_layout()
-    output_path = os.path.join(OUTPUT_DIR, 'anomaly_risk_analysis_dl.png')
+    output_path = os.path.join(BASE_DIR, 'docs', 'anomaly_risk_analysis_dl.png')
     plt.savefig(output_path)
     print(f"Analysis plot saved to {output_path}")
 
@@ -404,7 +405,7 @@ def main():
         df = calculate_risk_score(df)
         plot_analysis(df)
         
-        outfile = os.path.join(OUTPUT_DIR, 'smart_ambulance_risk_scored_dl.csv')
+        outfile = os.path.join(BASE_DIR, 'data', 'smart_ambulance_risk_scored_dl.csv')
         df.to_csv(outfile, index=False)
         print(f"Results saved to {outfile}")
 

@@ -4,7 +4,9 @@ from sklearn.metrics import precision_score, recall_score, f1_score, confusion_m
 import matplotlib.pyplot as plt
 
 # Load Data
-FILE_PATH = r"C:\Users\HP\OneDrive\Desktop\MSC BDA\Aman Sir\smart_ambulance_risk_scored_dl.csv"
+import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FILE_PATH = os.path.join(BASE_DIR, "data", "smart_ambulance_risk_scored_dl.csv")
 print(f"Loading data from {FILE_PATH}...")
 df = pd.read_csv(FILE_PATH)
 df['timestamp'] = pd.to_datetime(df['timestamp'])

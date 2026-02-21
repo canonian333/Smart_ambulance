@@ -5,6 +5,9 @@ import pandas as pd
 import joblib
 import torch
 import torch.nn as nn
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # --- Model Definition (Must match training) ---
 class LSTMAutoencoder(nn.Module):
@@ -43,12 +46,14 @@ def load_artifacts():
     global model, scaler
     try:
         # Load Scaler
-        scaler = joblib.load("scaler.pkl")
+        scaler_path = os.path.join(BASE_DIR, "models", "scaler.pkl")
+        scaler = joblib.load(scaler_path)
         
         # Load Model
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model = LSTMAutoencoder(seq_len=SEQ_LEN, n_features=len(FEATURES)).to(device)
-        model.load_state_dict(torch.load("lstm_autoencoder.pth", map_location=device))
+        model_path = os.path.join(BASE_DIR, "models", "lstm_autoencoder.pth")
+        model.load_state_dict(torch.load(model_path, map_location=device))
         model.eval()
         print("Model and Scaler loaded successfully.")
     except Exception as e:
@@ -194,6 +199,7 @@ from fastapi.responses import HTMLResponse
 
 @app.get("/", response_class=HTMLResponse)
 def home():
-    with open("index.html", "r") as f:
+    template_path = os.path.join(BASE_DIR, "app", "templates", "index.html")
+    with open(template_path, "r") as f:
         html_content = f.read()
     return HTMLResponse(content=html_content, status_code=200)
