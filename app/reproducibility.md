@@ -3,13 +3,21 @@
 ## 1. Project Structure
 ```
 /
-├── anomaly.py           # Training Pipeline & Model Definition
-├── app.py               # FastAPI Service for Inference
-├── evaluate_alerts.py   # Metrics & Failure Analysis
-├── requirements.txt     # Python Dependencies
-├── scaler.pkl           # Trained Scaler Artifact
-├── lstm_autoencoder.pth # Trained Model Weights
-└── smart_ambulance_synthetic_data.csv # Dataset
+├── app/                 # Web Application & Templates
+│   ├── app.py           # FastAPI Service for Inference
+│   ├── reproducibility.md # Deployment Guide (This file)
+│   └── templates/       # HTML Templates
+├── src/                 # Source Code for ML & Evaluation
+│   ├── anomaly.py       # Training Pipeline & Model Definition
+│   └── evaluate_alerts.py # Metrics & Failure Analysis
+├── models/              # Saved Model Artifacts
+│   ├── scaler.pkl       # Trained Scaler Artifact
+│   └── lstm_autoencoder.pth # Trained Model Weights
+├── data/                # Datasets & Processed Output
+│   └── smart_ambulance_synthetic_data.csv
+├── docs/                # Project Documentation
+├── notebooks/           # Jupyter Notebooks
+└── requirements.txt     # Python Dependencies
 ```
 
 ## 2. Setup Environment
@@ -22,14 +30,14 @@
 ## 3. Training the Model
 Run the main script to train the LSTM Autoencoder and generate artifacts (`scaler.pkl`, `lstm_autoencoder.pth`):
 ```bash
-python anomaly.py
+python src/anomaly.py
 ```
 *   This will also produce the `smart_ambulance_risk_scored_dl.csv` and analysis plots.
 
 ## 4. Running the API Service
 Start the FastAPI server:
 ```bash
-uvicorn app:app --reload
+uvicorn app.app:app --reload
 ```
 *   The API will be available at `http://127.0.0.1:8000`.
 *   Interactive Docs (Swagger UI): `http://127.0.0.1:8000/docs`.
@@ -61,6 +69,6 @@ Send a **POST** request to `/predict` with JSON payload:
 ## 6. Metrics & Evaluation
 To see the Precision, Recall, and Failure Analysis report:
 ```bash
-python evaluate_alerts.py
+python src/evaluate_alerts.py
 ```
 This script acts as the Quality Assurance gate before deployment.
